@@ -1,5 +1,11 @@
 #include"sem.h"
 
+
+/*函数名：init_sem
+ *  功能：初始化sem
+ *  参数：int sem_id semget的返回值 ，init_value 信号量初始值
+ *  返回：成功返回0，失败返回-1
+ */
 int init_sem(int sem_id, int init_value)
 {
 	union semun sem_union;
@@ -14,6 +20,11 @@ int init_sem(int sem_id, int init_value)
 	return 0;
 }
 
+/*函数名：del_sem
+ *  功能：删除sem
+ *  参数：int sem_id semget的返回值
+ *  返回：成功返回0，失败返回-1
+ */
 int del_sem (int sem_id)
 {
 	union semun sem_union;
@@ -28,6 +39,11 @@ int del_sem (int sem_id)
 }
 
 
+/*函数名：sem_p
+ *  功能：信号量P操作
+ *  参数：int sem_id semget的返回值
+ *  返回：成功返回0，失败返回-1
+ */
 int sem_p(int sem_id)
 {
 	struct sembuf sem_b;
@@ -44,6 +60,11 @@ int sem_p(int sem_id)
 	return 0;
 }
 
+/*函数名：sem_v
+ *  功能：信号量v操作
+ *  参数：int sem_id semget的返回值
+ *  返回：成功返回0，失败返回-1
+ */
 int sem_v(int sem_id)
 {
 	struct sembuf sem_b;

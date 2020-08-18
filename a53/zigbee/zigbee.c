@@ -63,10 +63,35 @@ void *ZigbeeRead(void * arg)
 	sSensorType *pSensor;
 	MSG buf;
 
+	printf("%s start\n",__FUNCTION__);
+
 	key = ftok("/project2",0x111);
 
+	if(key == -1)
+	{
+		perror("key");
+	}else
+	{
+		printf("%s ftok ok key:%d\n",__FUNCTION__,key);
+	}
+
 	shmid = shmget(key,sizeof(sSensorType),IPC_CREAT|0666);
+	if(shmid == -1)
+	{
+		perror("shmget");
+	}else
+	{
+		printf("%s shmget ok key:%d\n",__FUNCTION__,shmid);
+	}
+
 	semid = semget(key, 1,IPC_CREAT|0666);
+	if(semid == -1)
+	{
+		perror("semget");
+	}else
+	{
+		printf("%s semget ok key:%d\n",__FUNCTION__,semid);
+	}
 
 	init_sem(semid, 1);
 
@@ -74,6 +99,12 @@ void *ZigbeeRead(void * arg)
 
 	while(1)
 	{
+		sem_p(semid);
+			memcpy(pSensor->temperature,"aa",3);
+			memcpy(pSensor->humidity,"aa",3);
+			memcpy(pSensor->light,"aa",3);
+		sem_v(semid);
+		/*
 		read(fd, buf, sizeof(sCmd));
 
 		sem_p(semid);
@@ -87,7 +118,7 @@ void *ZigbeeRead(void * arg)
 		memcpy(pSensor->light,&buf.buf[4],1);
 		pSensor->light[1]= '\0';
 
-		sem_v(semid);
+		sem_v(semid);*/
 	}
 	printf("ZigbeeRead\n");
 }

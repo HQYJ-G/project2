@@ -3,16 +3,15 @@ CFLAGS=-g -Wall
 CC=arm-none-linux-gnueabi-gcc
 AR=arm-none-linux-gnueabi-ar
 RANLIB=arm-none-linux-gnueabi-ranlib
-LIBS=-L./ -lcgic -I../inc
+LIBS=-L./ -lcgic -I../inc -I../sem
 ROOTFS_DIR = /home/x/nfs/rootfs
 
 
 OBJS = led.cgi
-#OBJS += data_show.cgi
 OBJS += fan.cgi
 OBJS += buzzer.cgi
 
-all: $(OBJS)
+all: $(OBJS) data_show.cgi
 
 install: 
 	cp *.cgi $(ROOTFS_DIR)/boa/cgi-bin/
@@ -26,7 +25,8 @@ libcgic.a: cgic.o cgic.h
 $(OBJS): %.cgi:%.c libcgic.a
 	$(CC) $< -o $@ ${LIBS}
 
-
+data_show.cgi:data_show.c libcgic.a sem.o
+	$(CC) $^ -o $@ ${LIBS}
 
 clean:
 	rm -f *.o *.a cgictest.cgi capture

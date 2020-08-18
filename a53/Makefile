@@ -17,6 +17,7 @@ OBJS += $(UART_DIR)/uart.o
 OBJS += $(SEM_DIR)/sem.o
 
 all:$(TARGET)
+	cp ./sem/sem.o ./cgi/
 	make -C ./cgi/
 
 $(TARGET):$(OBJS)
