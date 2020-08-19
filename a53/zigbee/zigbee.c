@@ -4,7 +4,11 @@
 #include"enum.h"
 #include"sem.h"
 
-
+/*函数名：ZigbeeWrite
+ * 	功能：通过串口向zigbee协调器写入数据
+ * 	参数：
+ *返回值：
+ */
 void *ZigbeeWrite(void * arg)
 {
 	int fd;
@@ -49,10 +53,23 @@ void *ZigbeeWrite(void * arg)
 		}
 
 		write(fd, &msg.msg, sizeof(MSG));
-
+/*		
+		if(msg.msg.cmd.status == ON)
+		{
+			write(fd, "on", 3);
+		}else
+		{
+			write(fd, "off", 4);
+		}
+*/		
 	}
 }
 
+/*函数名：ZigbeeRe
+ * 	功能：通过串口向zigbee协调器读取数据
+ * 	参数：
+ *返回值：
+ */
 void *ZigbeeRead(void * arg)
 {
 	int fd;
@@ -99,26 +116,33 @@ void *ZigbeeRead(void * arg)
 
 	while(1)
 	{
+		/*
 		sem_p(semid);
 			memcpy(pSensor->temperature,"aa",3);
 			memcpy(pSensor->humidity,"aa",3);
 			memcpy(pSensor->light,"aa",3);
 		sem_v(semid);
-		/*
-		read(fd, buf, sizeof(sCmd));
-
+		*/
+		printf("wait read\n");		
+		read(fd, &buf, sizeof(MSG));
+		printf("%s msgrcv:%d-%d-%d\n",__FUNCTION__,buf.cmd.type,buf.cmd.control,buf.cmd.status);
+	/*	
+		char c[32];
+		read(fd, c, 32);
+		printf("%s %s %s\n",__FUNCTION__ ,c,c+4);
 		sem_p(semid);
-
+	*/
 		memcpy(pSensor->temperature,&buf.buf[0],2);
 		pSensor->temperature[2] = '\0';
-
+		
 		memcpy(pSensor->humidity,&buf.buf[2],2);
 		pSensor->humidity[2] = '\0';
 
 		memcpy(pSensor->light,&buf.buf[4],1);
 		pSensor->light[1]= '\0';
-
-		sem_v(semid);*/
+		
+//		printf("%s %s %s\n",pSensor->temperature,pSensor->humidity,pSensor->light);
+		sem_v(semid);
 	}
 	printf("ZigbeeRead\n");
 }
