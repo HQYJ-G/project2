@@ -33,8 +33,8 @@ int cgiMain()
 	fprintf(cgiOut,"<TITLE>传感器数据</TITLE></HEAD>\n");
 	fprintf(cgiOut,"<BODY><H1>传感器数据</H1>\n");
 
-	fprintf(cgiOut,"<p>温度:%s℃ </p>\n", data -> temperature);
-	fprintf(cgiOut,"<p>湿度:%s\%</p>\n", data -> humidity);
+	fprintf(cgiOut,"<p>温度:%d.%d℃ </p>\n", data -> temperature[0],data -> temperature[1]);
+	fprintf(cgiOut,"<p>湿度:%d.%d\%</p>\n", data -> humidity[0],data -> humidity[1]);
 	fprintf(cgiOut,"<p>光照:%sLux</p>\n", data -> light);
 //	fprintf(cgiOut,"<p>电压:%.2f</p>\n", data -> rp.voltage);
 //	fprintf(cgiOut,"<p>陀螺仪:X:%4d Y:%4d Z:%4d</p>\n",data->mpu6050.gyrox,data->mpu6050.gyroy,data->mpu6050.gyroz);

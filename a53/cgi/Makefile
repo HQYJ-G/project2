@@ -3,13 +3,18 @@ CFLAGS=-g -Wall
 CC=arm-none-linux-gnueabi-gcc
 AR=arm-none-linux-gnueabi-ar
 RANLIB=arm-none-linux-gnueabi-ranlib
-LIBS=-L./ -lcgic -I../inc -I../sem
+LIBS=-L./ -lcgic \
+	 -lsqlite3 \
+	 -I../inc \
+	 -I../sem \
+	 -I../sql
 ROOTFS_DIR = /home/x/nfs/rootfs
 
 
 OBJS = led.cgi
 OBJS += fan.cgi
 OBJS += buzzer.cgi
+OBJS += log.cgi
 
 all: $(OBJS) data_show.cgi
 

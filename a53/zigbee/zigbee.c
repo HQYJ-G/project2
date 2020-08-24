@@ -3,6 +3,8 @@
 #include"common.h"
 #include"enum.h"
 #include"sem.h"
+#include"sqlite.h"
+#include<time.h>
 
 /*函数名：ZigbeeWrite
  * 	功能：通过串口向zigbee协调器写入数据
@@ -12,12 +14,14 @@
 void *ZigbeeWrite(void * arg)
 {
 	int fd;
-	fd = (int)arg;
-	
+	sDes *des = (sDes *)arg;
+	fd = ((sDes *)arg)->fd;
 	key_t key;
 	int qid;
-
 	struct msgbuf msg;
+	char sqlval[128];
+	time_t t;
+
 
 	printf("%s start\n",__FUNCTION__);
 
@@ -49,11 +53,16 @@ void *ZigbeeWrite(void * arg)
 			perror("msgrcv");
 		}else
 		{
+			time(&t);
+
 			printf("%s msgrcv:%d-%d-%d\n",__FUNCTION__,msg.msg.cmd.type,msg.msg.cmd.control,msg.msg.cmd.status);
+			sprintf(sqlval,"\"%d_%d_%d\",\"%s\"",msg.msg.cmd.type,msg.msg.cmd.control,msg.msg.cmd.status,ctime(&t));
+
 		}
+		Insert(des->db,"cmd","CMD,DATE",sqlval);
 
 		write(fd, &msg.msg, sizeof(MSG));
-/*		
+	/*发送字符测试	
 		if(msg.msg.cmd.status == ON)
 		{
 			write(fd, "on", 3);
@@ -61,7 +70,7 @@ void *ZigbeeWrite(void * arg)
 		{
 			write(fd, "off", 4);
 		}
-*/		
+	*/	
 	}
 }
 
@@ -73,7 +82,9 @@ void *ZigbeeWrite(void * arg)
 void *ZigbeeRead(void * arg)
 {
 	int fd;
-	fd = (int)arg;
+	sDes *des = (sDes *)arg;
+	fd = ((sDes *)arg)->fd;
+
 	key_t key;
 	int shmid;
 	int semid;
@@ -116,22 +127,37 @@ void *ZigbeeRead(void * arg)
 
 	while(1)
 	{
-		/*
+		/*测试用虚拟数据
 		sem_p(semid);
 			memcpy(pSensor->temperature,"aa",3);
 			memcpy(pSensor->humidity,"aa",3);
 			memcpy(pSensor->light,"aa",3);
 		sem_v(semid);
 		*/
+		
 		printf("wait read\n");		
 		read(fd, &buf, sizeof(MSG));
-		printf("%s msgrcv:%d-%d-%d\n",__FUNCTION__,buf.cmd.type,buf.cmd.control,buf.cmd.status);
-	/*	
+		printf("%s msgrcv:%d-%d-%d-%d\n",__FUNCTION__,buf.cmd.type,buf.cmd.control,buf.cmd.status,buf.buf);
+
+		/*字符接收测试
 		char c[32];
+		memset(c,0,32);
 		read(fd, c, 32);
 		printf("%s %s %s\n",__FUNCTION__ ,c,c+4);
+		*/
+
 		sem_p(semid);
-	*/
+		
+		switch(buf.cmd.type)
+		{
+			case HUMITURE:
+				memcpy(pSensor->temperature,&buf.buf[0],2);
+				memcpy(pSensor->humidity,&buf.buf[2],2);
+				break;
+			defaule:
+				break;
+		}
+/*	处理ascii码的方式
 		memcpy(pSensor->temperature,&buf.buf[0],2);
 		pSensor->temperature[2] = '\0';
 		
@@ -140,9 +166,10 @@ void *ZigbeeRead(void * arg)
 
 		memcpy(pSensor->light,&buf.buf[4],1);
 		pSensor->light[1]= '\0';
-		
+*/		
 //		printf("%s %s %s\n",pSensor->temperature,pSensor->humidity,pSensor->light);
 		sem_v(semid);
 	}
-	printf("ZigbeeRead\n");
+
+	shmdt(pSensor);
 }

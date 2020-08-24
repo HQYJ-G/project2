@@ -31,7 +31,7 @@ int open_uart(char * port)
 		return -1;
 	}
 
-	printf("open uart succeed\n");
+	printf("open uart succeed %d\n",fd);
 	return fd;
 }
 
@@ -144,7 +144,7 @@ int set_uart(int fd, int baud_rate, int data_bits, char parity, int stop_bits)
 		return -1;
 	}
 
-	printf("set uart succeed\n");
+	printf("set uart succeed %d\n",fd);
 	return 0;
 }
 

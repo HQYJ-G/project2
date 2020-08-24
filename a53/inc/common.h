@@ -1,6 +1,8 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
+#include "sqlite.h"
+
 typedef struct
 {
 	char humidity[4];
@@ -9,4 +11,9 @@ typedef struct
 
 }sSensorType;
 
+typedef struct
+{
+	sqlite3 *db;
+	int fd;
+}sDes;
 #endif

@@ -2,5 +2,5 @@
 
 
 /boa/boa
-/mjpg-streamer/start.sh
+/mjpg-streamer/start.sh &
 

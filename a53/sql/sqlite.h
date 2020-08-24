@@ -12,44 +12,16 @@
 #ifndef __SQLITE_H__
 #define __SQLITE_H__
 
-#include<sqlite3.h>
-#include<iostream>
-#include<queue>
+#include"sqlite3.h"
 #include<stdio.h>
 
-using namespace std;
+#define CMDLEN 128
 
-typedef struct
-{
-    string key;
-    string val;
-    int num;
-}sBufType;
+sqlite3* open_sqlite(const char *s);
+void close_sqlite(sqlite3 * db);
+int CreateTable(sqlite3 *db,const char * TableName,const char * ColumnName);
+int Select(sqlite3 *db, const char * TableName, const char * Pos);
+int callbask(void *data, int argc, char **argv, char **azColName);
+int Insert(sqlite3 *db, const char *TableName, const char *ColumnName,const char *Value);
 
-
-
-class cSqlite
-{
-	private:
-		sqlite3 *db;
-        int Result;
-        char * ErrMsg;
-        static int callbask(void *data, int argc, char **argv, char **azColName);
-
-	public:
-
-        queue<sBufType> Buf;
-
-        cSqlite(const string s);
-        ~cSqlite();
-        int CreateTable(const string TableName,const string ColumnName);
-        int Select(const string TableName, const string Pos);
-        int Insert(const string TableName, const string ColumnName,const string Value);
-        int Updata(const string TableName, const string Pos,const string KeyVal);
-        int Delect(const string TableName, const string Pos);
-        int CleanBuf(void);
-        int QueueOut(sBufType &Buf);
-};
-
-int CreateInfo(void);
 #endif
