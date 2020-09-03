@@ -13,7 +13,7 @@ sqlite3 * html_open_sqlite(const char *s)
 
     if (Result == 0)
     {
-        fprintf(cgiOut,"<p>open sql success</p>\n");
+//        fprintf(cgiOut,"<p>open sql success</p>\n");
     }else
     {
         fprintf(cgiOut,"<p>open sql error</p>\n");
@@ -28,14 +28,14 @@ int html_callbask(void *data, int argc, char **argv, char **azColName)
 {
     int i;
 
-	fprintf(cgiOut,"<p>|");
+	fprintf(cgiOut,"<tr>");
 
     for(i=0; i < argc; i++)
     {
-		fprintf(cgiOut,"%-5s|",argv[i]?argv[i]:"NULL");
+		fprintf(cgiOut,"<td>%s</td>",argv[i]?argv[i]:"NULL");
     }
 
-	fprintf(cgiOut,"</p>\n");
+	fprintf(cgiOut,"</tr>\n");
     return 0;
 }
 
@@ -57,10 +57,10 @@ int html_select(sqlite3 *db,const char * TableName)
 
     if(Result == 0)
 	{
-		fprintf(cgiOut,"<p> Select table success</p>\n");
+//		fprintf(cgiOut,"<p> Select table success</p>\n");
 	}else
 	{	
-		fprintf(cgiOut,"<p> Select table success</p>\n");
+		fprintf(cgiOut,"<p> Select table error</p>\n");
 		return -1;
 	}
 
@@ -77,13 +77,30 @@ int cgiMain()
 	cgiHeaderContentType("text/html");
 	fprintf(cgiOut,"<HTML><HEAD>\n");
 	fprintf(cgiOut,"<meta charset =\"utf-8\">\n");
-	fprintf(cgiOut,"<TITLE>操作历史</TITLE></HEAD>\n");
-	fprintf(cgiOut,"<BODY><H1>操作历史</H1>\n");
+	fprintf(cgiOut,"<TITLE>日志</TITLE></HEAD>\n");
+	fprintf(cgiOut,"<BODY><H1>日志</H1>\n");
 	db = html_open_sqlite("/project2/log");
-	fprintf(cgiOut,"<p>------------------------</p>");
-	fprintf(cgiOut,"<p>|ID|CMD|DATE|</p>");
+
+	fprintf(cgiOut,"<h>操作历史</h>");
+	fprintf(cgiOut,"<table border=\"1\">");
+	fprintf(cgiOut,"<tr>");
+	fprintf(cgiOut,"<th>序号</th>");
+	fprintf(cgiOut,"<th>命令</th>");
+	fprintf(cgiOut,"<th>日期</th>");
+	fprintf(cgiOut,"</tr>");
 	html_select(db,"cmd");
-	fprintf(cgiOut,"<p>------------------------</p>");
+	fprintf(cgiOut,"</table>");
+	fprintf(cgiOut,"<p>                </p>");
+	fprintf(cgiOut,"<h>传感器历史</h>");
+	fprintf(cgiOut,"<table border=\"1\">");
+	fprintf(cgiOut,"<tr>");
+	fprintf(cgiOut,"<th>序号</th>");
+	fprintf(cgiOut,"<th>温度</th>");
+	fprintf(cgiOut,"<th>湿度</th>");
+	fprintf(cgiOut,"<th>日期</th>");
+	fprintf(cgiOut,"</tr>");
+	html_select(db,"env_data");
+	fprintf(cgiOut,"</table>");
 
 	fprintf(cgiOut,"<a href = \"/index.html\"> back </a>\n");
 	fprintf(cgiOut,"</BODY>\n");

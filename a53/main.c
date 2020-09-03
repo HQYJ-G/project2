@@ -1,11 +1,18 @@
 #include<stdio.h>
 #include<string.h>
 #include<pthread.h>
+#include<sys/types.h>
+#include<sys/ipc.h>
+#include<sys/shm.h>
 #include"zigbee.h"
 #include"uart.h"
 #include"sqlite.h"
 #include"common.h"
 
+extern int qid;
+extern int shmid;
+extern int semid;
+extern struct EnvMsg *pEnvMsg;
 
 int main(int argc, const char *argv[])
 {
@@ -23,11 +30,11 @@ int main(int argc, const char *argv[])
 		return -1;
 	}
 
-	des.db = open_sqlite("log");
+	des.db = open_sqlite("/project2/log");
 
 	CreateTable(des.db,"cmd","ID INTEGER PRIMARY KEY AUTOINCREMENT,CMD TEXT,DATE TEXT");
 
-	CreateTable(des.db,"env_data","ID INTEGER PRIMARY KEY AUTOINCREMENT,data TEXT,DATE TEXT");
+	CreateTable(des.db,"env_data","ID INTEGER PRIMARY KEY AUTOINCREMENT,TEMP TEXT,HUM TEXT,DATE TEXT");
 
 	pthread_create(&M0_Read, NULL, ZigbeeRead,(void *)&des);
 	pthread_create(&M0_Write, NULL, ZigbeeWrite,(void *)&des);
@@ -39,5 +46,9 @@ int main(int argc, const char *argv[])
 
 	close_sqlite(des.db);
 	close_uart(des.fd);
+	msgctl(qid,IPC_RMID,NULL);
+	del_sem(semid);
+	shmdt(pEnvMsg);
+	shmctl(shmid,IPC_RMID,NULL);
 	return 0;
 }

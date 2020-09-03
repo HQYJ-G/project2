@@ -27,16 +27,26 @@ int cgiMain()
 	cgiFormString("FAN", buf_6, 16);
 
 	
-	if(!strncmp(buf_6, "HIGH", 4))
+	if(!strncmp(buf_6, "HIGHEST", 7))
 	{
-		msg.msg.cmd.control = FANI;
+		msg.msg.cmd.control = FANIV;
+		msg.msg.cmd.status = ON;
+	}
+	else if(!strncmp(buf_6,"HIGH",4))
+	{
+		msg.msg.cmd.control = FANIII;	
 		msg.msg.cmd.status = ON;
 	}
 	else if(!strncmp(buf_6,"LOW",3))
 	{
 		msg.msg.cmd.control = FANII;
 		msg.msg.cmd.status = ON;
-	}else
+	}else if(!strncmp(buf_6,"LOWEST",6))
+	{
+		msg.msg.cmd.control = FANI;
+		msg.msg.cmd.status = ON;
+	}
+	else
 	{
 		msg.msg.cmd.status = OFF;
 	}

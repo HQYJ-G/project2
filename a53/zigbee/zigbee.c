@@ -6,6 +6,12 @@
 #include"sqlite.h"
 #include<time.h>
 
+
+int qid;
+int shmid;
+int semid;
+struct EnvMsg *pEnvMsg;
+
 /*函数名：ZigbeeWrite
  * 	功能：通过串口向zigbee协调器写入数据
  * 	参数：
@@ -17,7 +23,6 @@ void *ZigbeeWrite(void * arg)
 	sDes *des = (sDes *)arg;
 	fd = ((sDes *)arg)->fd;
 	key_t key;
-	int qid;
 	struct msgbuf msg;
 	char sqlval[128];
 	time_t t;
@@ -48,13 +53,13 @@ void *ZigbeeWrite(void * arg)
 
 	while(1)
 	{
+		memset(&msg,0,sizeof(MSG));
 		if(msgrcv(qid, &msg, sizeof(MSG),0,0) == -1)
 		{
 			perror("msgrcv");
 		}else
 		{
 			time(&t);
-
 			printf("%s msgrcv:%d-%d-%d\n",__FUNCTION__,msg.msg.cmd.type,msg.msg.cmd.control,msg.msg.cmd.status);
 			sprintf(sqlval,"\"%d_%d_%d\",\"%s\"",msg.msg.cmd.type,msg.msg.cmd.control,msg.msg.cmd.status,ctime(&t));
 
@@ -86,10 +91,9 @@ void *ZigbeeRead(void * arg)
 	fd = ((sDes *)arg)->fd;
 
 	key_t key;
-	int shmid;
-	int semid;
-	sSensorType *pSensor;
-	MSG buf;
+	char sqlval[128];
+	int flag = 0;
+	time_t t;
 
 	printf("%s start\n",__FUNCTION__);
 
@@ -103,7 +107,7 @@ void *ZigbeeRead(void * arg)
 		printf("%s ftok ok key:%d\n",__FUNCTION__,key);
 	}
 
-	shmid = shmget(key,sizeof(sSensorType),IPC_CREAT|0666);
+	shmid = shmget(key,sizeof(struct EnvMsg),IPC_CREAT|0666);
 	if(shmid == -1)
 	{
 		perror("shmget");
@@ -123,7 +127,7 @@ void *ZigbeeRead(void * arg)
 
 	init_sem(semid, 1);
 
-	pSensor = (sSensorType *)shmat(shmid,NULL,0);
+	pEnvMsg = (struct EnvMsg *)shmat(shmid,NULL,0);
 
 	while(1)
 	{
@@ -135,41 +139,21 @@ void *ZigbeeRead(void * arg)
 		sem_v(semid);
 		*/
 		
-		printf("wait read\n");		
-		read(fd, &buf, sizeof(MSG));
-		printf("%s msgrcv:%d-%d-%d-%d\n",__FUNCTION__,buf.cmd.type,buf.cmd.control,buf.cmd.status,buf.buf);
-
-		/*字符接收测试
-		char c[32];
-		memset(c,0,32);
-		read(fd, c, 32);
-		printf("%s %s %s\n",__FUNCTION__ ,c,c+4);
-		*/
+		printf("wait read\n");	
 
 		sem_p(semid);
-		
-		switch(buf.cmd.type)
-		{
-			case HUMITURE:
-				memcpy(pSensor->temperature,&buf.buf[0],2);
-				memcpy(pSensor->humidity,&buf.buf[2],2);
-				break;
-			defaule:
-				break;
-		}
-/*	处理ascii码的方式
-		memcpy(pSensor->temperature,&buf.buf[0],2);
-		pSensor->temperature[2] = '\0';
-		
-		memcpy(pSensor->humidity,&buf.buf[2],2);
-		pSensor->humidity[2] = '\0';
-
-		memcpy(pSensor->light,&buf.buf[4],1);
-		pSensor->light[1]= '\0';
-*/		
-//		printf("%s %s %s\n",pSensor->temperature,pSensor->humidity,pSensor->light);
+		read(fd, pEnvMsg, sizeof(struct EnvMsg));
 		sem_v(semid);
+		if(10 == flag++)
+		{
+			time(&t);
+
+			sprintf(sqlval,"\"%d.%d\",\"%d.%d\",\"%s\"",pEnvMsg->temp[0],pEnvMsg->temp[1],pEnvMsg->hum[0],pEnvMsg->hum[1],ctime(&t));
+			Insert(des->db,"env_data","TEMP,HUM,DATE",sqlval);
+			flag = 0;
+		}
+
 	}
 
-	shmdt(pSensor);
+	shmdt(pEnvMsg);
 }

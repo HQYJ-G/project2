@@ -15,6 +15,7 @@ OBJS = led.cgi
 OBJS += fan.cgi
 OBJS += buzzer.cgi
 OBJS += log.cgi
+OBJS += tubes.cgi
 
 all: $(OBJS) data_show.cgi
 
